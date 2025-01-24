@@ -9,10 +9,11 @@ import {
   runAtom,
 } from "@/atom";
 import { useAtom } from "jotai";
-import React from "react";
+import React, { useContext } from "react";
+import { StateProviderContext } from "../stateProvider";
 
 function Header() {
-  const [assistant] = useAtom(assistantAtom);
+  const { assistant } = useContext(StateProviderContext)!;
   const [file] = useAtom(fileAtom);
   const [assistantFile] = useAtom(assistantFileAtom);
   const [thread] = useAtom(threadAtom);

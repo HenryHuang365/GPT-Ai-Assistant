@@ -4,13 +4,55 @@ import { assistantAtom, fileAtom, messagesAtom } from "@/atom";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useAtom } from "jotai";
-import { Assistant } from "openai/resources/beta/assistants/assistants.mjs";
-import React, { useState } from "react";
+import { Assistant } from "openai/resources/beta/assistants.mjs";
+import React, { useContext, useState } from "react";
 import toast from "react-hot-toast";
+import { StateProviderContext } from "../stateProvider";
 
-function Assistant() {
-  // Atom State
-  const [assistant, setAssistant] = useAtom(assistantAtom);
+// ######################## Featch Assistant Create ######################## //
+async function fetchCreateAssistant() {
+  const response = await fetch("/api/assistant/create");
+  if (!response.ok) {
+    throw new Error("Failed to create assistant");
+  }
+  return response.json();
+}
+
+// ######################## Featch Assistant Modify ######################## //
+async function fetchModifyAssistant(assistantId: string, fileId: string) {
+  const response = await fetch(
+    `/api/assistant/modify?assistantId=${encodeURIComponent(
+      assistantId
+    )}&fileId=${encodeURIComponent(fileId)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to modify assistant");
+  }
+  return response.json();
+}
+
+// ######################## Featch Assistant List ######################## //
+async function fetchListAssistants() {
+  const response = await fetch(`/api/assistant/list`);
+  if (!response.ok) {
+    throw new Error("Failed to list assistants");
+  }
+  return response.json();
+}
+
+// ######################## Featch Assistant Delete ######################## //
+async function fetchDeleteAssistant(assistantId: string) {
+  const response = await fetch(
+    `/api/assistant/delete?assistantId=${encodeURIComponent(assistantId)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to delete assistant");
+  }
+}
+
+function AssistantRow() {
+  // Atom State / Application store state
+  const { assistant, setAssistant } = useContext(StateProviderContext)!;
   const [, setMessages] = useAtom(messagesAtom);
   const [file] = useAtom(fileAtom);
 
@@ -23,11 +65,9 @@ function Assistant() {
   const handleCreate = async () => {
     setCreating(true);
     try {
-      const response = await axios.get<{ assistant: Assistant }>(
-        "/api/assistant/create"
-      );
+      const data = await fetchCreateAssistant();
+      const newAssistant = data.assistant;
 
-      const newAssistant = response.data.assistant;
       console.log("newAssistant", newAssistant);
       setAssistant(newAssistant);
       localStorage.setItem("assistant", JSON.stringify(newAssistant));
@@ -125,4 +165,4 @@ function Assistant() {
   );
 }
 
-export default Assistant;
+export default AssistantRow;
